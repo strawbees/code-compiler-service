@@ -1,0 +1,17 @@
+/.ebextensions
+/.elasticbeanstalk
+yarn.lock
+/tests
+_tmp
+.DS_Store
+original_node_modules
+node_modules
+npm-debug.log
+/.db
+/db
+/_t*
+/tmp*
+/.tmp*
+/.tmp-sketches*
+/.tmp-build*
+newrelic_agent.log

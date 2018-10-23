@@ -1,0 +1,15 @@
+.DS_Store
+original_node_modules
+node_modules
+npm-debug.log
+/.db
+/db
+/_t*
+/tmp*
+/.tmp*
+/.tmp-sketches*
+/.tmp-build*
+newrelic_agent.log
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
