@@ -9,7 +9,7 @@ const rimraf = require('./utils/rimraf')
 /**
  * Create control variables
 **/
-const TEMP_SLUG            = '_tmp'
+const TEMP_SLUG            = '_tmp_compiler'
 const FIRMWARE_SLUG        = 'firmware'
 const HARDWARE_SLUG        = 'quirkbot-arduino-hardware'
 const LIBRARY_SLUG         = 'quirkbot-arduino-library'
@@ -18,7 +18,7 @@ const ARDUINO_BUILDER_SLUG = 'quirkbot-arduino-builder'
 
 const ROOT_DIR            = process.env.COMPILER_BUILD_ROOT || process.env.BUILD_ROOT || './'
 const TEMP_DIR            = path.resolve(ROOT_DIR, TEMP_SLUG)
-const FIRMWARE_DIR        = path.resolve(ROOT_DIR, FIRMWARE_SLUG)
+const FIRMWARE_DIR        = path.resolve(__dirname, FIRMWARE_SLUG)
 const HARDWARE_DIR        = modulePath(HARDWARE_SLUG)
 const LIBRARY_DIR         = modulePath(LIBRARY_SLUG)
 const AVR_GCC_DIR         = modulePath(AVR_GCC_SLUG)
