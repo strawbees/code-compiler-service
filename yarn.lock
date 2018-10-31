@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-quirkbot-arduino-builder@0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/quirkbot-arduino-builder/-/quirkbot-arduino-builder-0.0.5.tgz#3a1d26413e0698e3d5923382dcbcbe2bf4aa0d78"
-  integrity sha512-jkdNgFAqU1RYqmzfhKEKN4hWBfcZTtBYo4Ta7lCcxzbsvkzNPIi5B46+dk4Ll0kS8X5viRyYINlEO2yNk2+xRA==
+quirkbot-arduino-builder@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/quirkbot-arduino-builder/-/quirkbot-arduino-builder-0.1.1.tgz#fc69e87ff7116136fb5db2478bdcb58825d21f37"
+  integrity sha512-8uk+AbylMO3V2AuMjtsLbPieo/d/SHjHRAHkZUxUWYRCkB78h5Ww34a4JBQDRZqLGsfjXPYMN/f5aljK0msAdw==
 
 quirkbot-arduino-hardware@0.4.11:
   version "0.4.11"
@@ -17,7 +17,7 @@ quirkbot-arduino-library@2.7.2:
   resolved "https://registry.yarnpkg.com/quirkbot-arduino-library/-/quirkbot-arduino-library-2.7.2.tgz#abe9202499d02097a8d8bd5f4ab1bf801f300037"
   integrity sha512-qch99xgahbHOUgedQmzhNYLGdzyu65qaO/zc5MdmTvG0nRFJMfFfmtyXCMuPsbTWBhVcBg0/MmmRRLQ1P0E8DQ==
 
-quirkbot-avr-gcc@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/quirkbot-avr-gcc/-/quirkbot-avr-gcc-1.0.1.tgz#27bcc963a2d1ae49e25f7ffff962170aae12687b"
-  integrity sha512-9oxOjg6U2xQnzpXlkBNXjfaqppmoYLB090vfcHWA/CMVHCERW5+wl+RbkNKLLFNNT2FDoMtjfII8Sr+cJMmJEg==
+quirkbot-avr-gcc@1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/quirkbot-avr-gcc/-/quirkbot-avr-gcc-1.1.3.tgz#5499a08f8ec2775626b8fbedcf36615ea949cc7e"
+  integrity sha512-5pzmMXjEbLoGrA/kYgSYaw5FsHnL7ENZwOOuLTb7IZnOQ3aiKluOyzAikp+pZG9RDxL8JPnAum2lvUom7cEP1w==

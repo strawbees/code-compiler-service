@@ -1,4 +1,4 @@
-# Quirkbot Compiler Stack
+# Strawbees CODE Compiler Service
 A stack that provides a service that compiles Quirkbot programs.
 
 The service is divided into 2 processes: a webserver and compiler worker.
@@ -13,7 +13,6 @@ After a program has been queued and is waiting for compilation, clients can chec
 
 Reads queued compilation requests out of a database and compiles them. It doesn't serve any content to external clients.
 
-
 # Requirements
 - Node.js
 - NPM
@@ -23,59 +22,3 @@ Reads queued compilation requests out of a database and compiles them. It doesn'
 The service is depends on OS specific precompiled packages:
 - [quirkbot-arduino-builder](https://www.npmjs.com/package/quirkbot-arduino-builder)
 - [quirkbot-avr-gcc](https://www.npmjs.com/package/quirkbot-avr-gcc)
-
-These packages simply mirror the files officially distributed by Arduino.
-
-# Installation
-
-### Clone repository
-```
-$ git clone https://github.com/Quirkbot/QuirkbotCompilerStack.git
-$ cd QuirkbotCompilerStack
-```
-
-### Install node dependencies
-
-```
-$ sudo npm install
-```
-
-# Environment variables
-
-### ```PORT```
-ConfigureS in which port the server will respond to.
-
-Defaults to ```8080```.
-
-### ```MONGO_URL```
-ConfigureS in which database the services will connect to.
-
-Defaults to ```mongodb://localhost:27017/quirkbot-compiler```.
-
-### ```WEB_CONCURRENCY```
-The number of forks that will be spawned for each process.
-
-On Heroku, it defaults to ```[Total available memory] / WEB_MEMEORY```
-, so the best way to configure is to set ```WEB_MEMORY``` according to what is best for your dyno.
-
-If ```WEB_CONCURRENCY``` is falsey, it will default to the number of cores of the machine.
-
-# Initialization
-### Database
-If Mongo is not running, start it up with:
-```
-$ mongod
-```
-### Webserver
-Start the webserver with
-```
-$ node server.js
-```
-### Compiler
-Start the compiler worker
-```
-$ node compiler.js
-```
-# Updating
-### Quirkbot Board and library
-See `package.json`.

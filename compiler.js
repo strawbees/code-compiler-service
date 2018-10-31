@@ -78,6 +78,7 @@ const init = async () => {
 		'-verbose ' +
 		'"' + path.join(FIRMWARE_DIR, 'firmware.ino') + '"'
 	)
+	await fs.writeFile(path.join(TEMP_DIR, 'arduinoBuilderOutput.txt'), arduinoBuilderOutput)
 	// /**
 	//  * Precompile header
 	// **/
