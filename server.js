@@ -1,129 +1,139 @@
 const http = require('http')
 const database = require('./database')
-const throng = require('./utils/throng')
 /**
- * Starts the webserver
- *
- * The webserver will act on 3 types of request. One that includes the program
- * source code to be added to the compilation queue, one that checks for the
- * result of the compilation process, and one for generic config retrival
- *
- * The source code should be provided direcly as the URL payload, eg:
- * http://{host}:{port}/{url-encoded-source-code}
- *
- * The compilation result should be requested by providing the compilation id as
- * the URL payload, prepended by the char 'i', eg:
- * http://{host}:{port}/i{compilation-id}
+* Initialize
+*/
+const init = () => {
+	startServer()
+	recursivelyClearOld()
+}
+/**
+* Index
 *
- * Generic configs should be requested by providing the config key
- * the URL payload, prepended by the char 'c', eg:
- * http://{host}:{port}/c{config-key}
- */
-const start = (workerId) => {
+* Provides meta info about the compiler
+*/
+/**
+* Starts the webserver
+*
+* The webserver will act on 3 types of request. One that includes the program
+* source code to be added to the compilation queue, one that checks for the
+* result of the compilation process, and one for generic config retrival
+*
+* The source code should be provided direcly as the URL payload, eg:
+* http://{host}:{port}/{url-encoded-source-code}
+*
+* The compilation result should be requested by providing the compilation id as
+* the URL payload, prepended by the char 'i', eg:
+* http://{host}:{port}/i{compilation-id}
+*
+* Generic configs should be requested by providing the config key
+* the URL payload, prepended by the char 'c', eg:
+* http://{host}:{port}/c{config-key}
+*/
+const startServer = () => {
 	const port = process.env.COMPILER_PORT || process.env.PORT || 8080
 	const server = http.createServer((request, response) => {
-		response.setHeader("Access-Control-Allow-Origin", "*")
+		response.setHeader('Access-Control-Allow-Origin', '*')
 
-		if(request.url.length === 1){
+		if (request.url.length === 1) {
 			indexRequest(request, response)
-		}
-		else if(request.url.charAt(1) === 'i'){
+		} else if (request.url.charAt(1) === 'i') {
 			resultRequest(request, response)
-		}
-		else if(request.url.charAt(1) === 'c'){
+		} else if (request.url.charAt(1) === 'c') {
 			configRequest(request, response)
-		}
-		else{
+		} else {
 			queueRequest(request, response)
 		}
 	})
 	server.listen(port)
-	console.log(`Server (${workerId}): Serving on port ${port}`)
+	console.log(`Server: Serving on port ${port}`)
 }
 /**
- * Index
- *
- * Provides meta info about the compiler
- */
+* Index
+*
+* Provides meta info about the compiler
+*/
 const indexRequest = (request, response) => {
-	response.writeHead(200, {'Content-Type': 'application/json'})
+	response.writeHead(200, { 'Content-Type' : 'application/json' })
 	response.end(JSON.stringify({
-		message: 'Quirkbot compiler',
-		endpoints:[
+		message   : 'Quirkbot compiler',
+		endpoints : [
 			{
-				'/{source-code}': 'Queues code for compilation'
+				'/{source-code}' : 'Queues code for compilation'
 			},
 			{
-				'/i{compilation-id}': 'Retrieves info of an ongoing compilation.'
+				'/i{compilation-id}' : 'Retrieves info of an ongoing compilation.'
 			},
 			{
-				'/c{config-key}': 'Retrieves value of a generic configuration by key.'
+				'/c{config-key}' : 'Retrieves value of a generic configuration by key.'
 			},
 			{
-				'/cfirmware-reset': 'A valid HEX that will reset the Quirkbot to the factory settings.'
+				'/cfirmware-reset' : 'A valid HEX that will reset the Quirkbot to the factory settings.'
 			},
 			{
-				'/clibrary-info': 'The content of the library.properties of the current Quirkbot library.'
+				'/clibrary-info' : 'The content of the library.properties of the current Quirkbot library.'
 			},
 			{
-				'/chardware-info': 'The content of the version.txt of the current Quirkbot board definition.'
+				'/chardware-info' : 'The content of the version.txt of the current Quirkbot board definition.'
 			}
 		]
 
 	}))
 }
 /**
- * Compilation queue handle
- *
- * Extracts the source code out of the request URL payload, and pipes it to the
- * queue process.
- *
- * On success, a response with status code 200 will be provided, alongside with
- * the compilation id for future reference.
- *
- * On error, a response with status code 403 will be provided, alongside with
- * the compiled error message.
- */
+* Compilation queue handle
+*
+* Extracts the source code out of the request URL payload, and pipes it to the
+* queue process.
+*
+* On success, a response with status code 200 will be provided, alongside with
+* the compilation id for future reference.
+*
+* On error, a response with status code 403 will be provided, alongside with
+* the compiled error message.
+*/
 const queueRequest = async (request, response) => {
 	let code
 	try {
 		code = decodeURIComponent(request.url.substr(1))
-	} catch(e) {}
+	} catch (e) {}
 
 	try {
-		if (code.indexOf('"Quirkbot.h"') == -1) {
+		if (code.indexOf('"Quirkbot.h"') === -1) {
 			throw new Error('Invalid Quirkbot program')
 		}
 		const id = await database.create(code)
 
-		response.writeHead(200, {'Content-Type': 'application/json'})
+		response.writeHead(200, { 'Content-Type' : 'application/json' })
 		response.end(JSON.stringify({ id, _id : id }))
 	} catch (error) {
 		console.log(error)
-		response.writeHead(403, {'Content-Type': 'application/json'})
+		response.writeHead(403, { 'Content-Type' : 'application/json' })
 		response.end(JSON.stringify({ error : error.message }))
 	}
 }
 /**
- * Compilation result handle
- *
- * Extracts the id out of the request URL payload, and pipes it to the result
- * request process
- *
- * On success, a response with status code 200 will be provided, alongside with
- * the compiled hex code.
- *
- * On error, a response with status code 403 will be provided, alongside with
- * the compiled error message.
- */
+* Compilation result handle
+*
+* Extracts the id out of the request URL payload, and pipes it to the result
+* request process
+*
+* On success, a response with status code 200 will be provided, alongside with
+* the compiled hex code.
+*
+* On error, a response with status code 403 will be provided, alongside with
+* the compiled error message.
+*/
 const resultRequest = async (request, response) => {
 	const id = request.url.substr(2)
 	let result = { id, _id : id }
+	let responseCode
 	try {
 		const instance = await database.extract(id)
 		result = { ...result, ...instance }
 		delete result.code
 		delete result.createdAt
+		// eslint-disable-next-line no-underscore-dangle
 		delete result.__v
 		responseCode = 200
 	} catch (error) {
@@ -131,21 +141,21 @@ const resultRequest = async (request, response) => {
 		responseCode = 403
 	}
 
-	response.writeHead(responseCode, { 'Content-Type': 'application/json' })
+	response.writeHead(responseCode, { 'Content-Type' : 'application/json' })
 	response.end(JSON.stringify(result))
 }
 /**
- * Config handle
- *
- * Extracts the key out of the request URL payload, and pipes it to the result
- * request process
- *
- * On success, a response with status code 200 will be provided, alongside with
- * config object
- *
- * On error, a response with status code 403 will be provided, alongside with
- * an compiled error message.
- */
+* Config handle
+*
+* Extracts the key out of the request URL payload, and pipes it to the result
+* request process
+*
+* On success, a response with status code 200 will be provided, alongside with
+* config object
+*
+* On error, a response with status code 403 will be provided, alongside with
+* an compiled error message.
+*/
 const configRequest = async (request, response) => {
 	const key = request.url.substr(2)
 	let code
@@ -163,12 +173,12 @@ const configRequest = async (request, response) => {
 	response.end(JSON.stringify(body))
 }
 /**
- * Recursive Database cleanup routine
- *
- * Every 40 seconds request the database to delete entries that are created more
- * that 30 seconds ago. This means that if a program's hex is not requested
- * within 30 seconds, it will be discarted.
- **/
+* Recursive Database cleanup routine
+*
+* Every 40 seconds request the database to delete entries that are created more
+* that 30 seconds ago. This means that if a program's hex is not requested
+* within 30 seconds, it will be discarted.
+*/
 const recursivelyClearOld = async () => {
 	try {
 		await database.clearOld(30000)
@@ -176,15 +186,4 @@ const recursivelyClearOld = async () => {
 	setTimeout(recursivelyClearOld, 40000)
 }
 
-/**
- * Starts the server in a cluster
- *
- * Initialize the Database cleanup routine, only on the master process
- **/
-// throng({
-// 	workers : process.env.WEB_CONCURRENCY || require('os').cpus().length,
-// 	master  : cleanOldEntries,
-// 	start
-// })
-start(0)
-recursivelyClearOld()
+module.exports.init = init
