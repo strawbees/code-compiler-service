@@ -16,10 +16,12 @@ const LIBRARY_SLUG = 'quirkbot-arduino-library'
 const AVR_GCC_SLUG = 'quirkbot-avr-gcc'
 const ARDUINO_BUILDER_SLUG = 'quirkbot-arduino-builder'
 
-const ROOT_DIR = process.env.COMPILER_BUILD_ROOT || process.env.BUILD_ROOT || './'
+const ROOT_DIR = __dirname
 const TEMP_DIR = path.resolve(ROOT_DIR, TEMP_SLUG)
 const BUILD_DIR = path.resolve(TEMP_SLUG, 'build')
-const FIRMWARE_DIR = path.resolve(__dirname, FIRMWARE_SLUG)
+const FIRMWARE_DIR = path.resolve(ROOT_DIR, FIRMWARE_SLUG)
+
+console.log('Compiler ROOT_DIR:', ROOT_DIR)
 
 /*
 * Relative dir paths (calculated on init)
@@ -142,7 +144,7 @@ const install = async () => {
 			.split(path.join(LIBRARY_DIR, 'src'))
 			.join(path.join(TEMP_DIR))
 			// relativise the paths
-			.split(__dirname).join('.')
+			.split(ROOT_DIR).join('.')
 	)
 	await fs.writeFile(path.join(TEMP_DIR, 'compile.sh'), compileScript)
 
@@ -152,7 +154,7 @@ const install = async () => {
 	const sizeScript = (
 		`"${path.join(AVR_GCC_DIR, 'tools', 'avr', 'bin', 'avr-size')}" ` +
 		`"${path.join(BUILD_DIR, 'firmware.ino.elf')}"`
-	).split(__dirname).join('.') // relativise the paths
+	).split(ROOT_DIR).join('.') // relativise the paths
 	await fs.writeFile(path.join(TEMP_DIR, 'size.sh'), sizeScript)
 
 	/*
@@ -174,8 +176,8 @@ const init = async () => {
 	/*
 	* Cache the necessary scripts
 	*/
-	TEMP_DIR_RELATIVE = TEMP_DIR.split(__dirname).join('.')
-	BUILD_DIR_RELATIVE = BUILD_DIR.split(__dirname).join('.')
+	TEMP_DIR_RELATIVE = TEMP_DIR.split(ROOT_DIR).join('.')
+	BUILD_DIR_RELATIVE = BUILD_DIR.split(ROOT_DIR).join('.')
 	SIZE_SCRIPT =
 		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'size.sh'))).toString()
 	COMPILE_SCRIPT =
