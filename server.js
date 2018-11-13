@@ -1,11 +1,14 @@
 const http = require('http')
 const database = require('./database')
+const pkg = require('./package.json')
 /**
 * Initialize
 */
 const init = () => {
+	console.log('Server init')
 	startServer()
 	recursivelyClearOld()
+	console.log('Server initialized')
 }
 /**
 * Index
@@ -34,12 +37,14 @@ const startServer = () => {
 	const port = process.env.COMPILER_PORT || process.env.PORT || 8080
 	const server = http.createServer((request, response) => {
 		response.setHeader('Access-Control-Allow-Origin', '*')
-
 		if (request.url.length === 1) {
 			indexRequest(request, response)
-		} else if (request.url.charAt(1) === 'i') {
+			return
+		}
+		const firstChar = request.url.charAt(1)
+		if (firstChar === 'i') {
 			resultRequest(request, response)
-		} else if (request.url.charAt(1) === 'c') {
+		} else if (firstChar === 'c') {
 			configRequest(request, response)
 		} else {
 			queueRequest(request, response)
@@ -56,8 +61,10 @@ const startServer = () => {
 const indexRequest = (request, response) => {
 	response.writeHead(200, { 'Content-Type' : 'application/json' })
 	response.end(JSON.stringify({
-		message   : 'Quirkbot compiler',
-		endpoints : [
+		message      : 'Strawbees CODE compiler',
+		version      : pkg.version,
+		dependencies : pkg.dependencies,
+		endpoints    : [
 			{
 				'/{source-code}' : 'Queues code for compilation'
 			},
@@ -65,20 +72,13 @@ const indexRequest = (request, response) => {
 				'/i{compilation-id}' : 'Retrieves info of an ongoing compilation.'
 			},
 			{
-				'/c{config-key}' : 'Retrieves value of a generic configuration by key.'
-			},
-			{
 				'/cfirmware-reset' : 'A valid HEX that will reset the Quirkbot to the factory settings.'
 			},
 			{
-				'/clibrary-info' : 'The content of the library.properties of the current Quirkbot library.'
-			},
-			{
-				'/chardware-info' : 'The content of the version.txt of the current Quirkbot board definition.'
+				'/cfirmware-booloader-updater' : 'A valid HEX that will update the Quirkbot bootloader.'
 			}
 		]
-
-	}))
+	}, null, '\t'))
 }
 /**
 * Compilation queue handle
@@ -107,7 +107,6 @@ const queueRequest = async (request, response) => {
 		response.writeHead(200, { 'Content-Type' : 'application/json' })
 		response.end(JSON.stringify({ id, _id : id }))
 	} catch (error) {
-		console.log(error)
 		response.writeHead(403, { 'Content-Type' : 'application/json' })
 		response.end(JSON.stringify({ error : error.message }))
 	}
@@ -162,12 +161,16 @@ const configRequest = async (request, response) => {
 	let body
 	try {
 		const config = await database.getConfig(key)
-		code = 200
-		body = config
+		if (config) {
+			code = 200
+			body = config
+		} else {
+			code = 404
+			body = { message : `key '${key}' not found` }
+		}
 	} catch (error) {
-		console.log(error)
 		code = 403
-		body = error
+		body = { message : error.message }
 	}
 	response.writeHead(code, { 'Content-Type' : 'application/json' })
 	response.end(JSON.stringify(body))

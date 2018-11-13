@@ -6,7 +6,7 @@ module.exports = (command, options = {}, envelope = {}) => new Promise((resolve,
 		{ maxBuffer : 1024 * 500, ...options },
 		(error, stdout, stderr) => {
 			if (!options.forceResolve && error !== null) {
-				reject(stderr)
+				reject(new Error(stderr))
 			} else {
 				resolve({ stdout, stderr })
 			}

@@ -20,6 +20,7 @@
     "eslint-plugin-react": "^7.10.0"
   },
   "scripts": {
+    "install" : "node install.js",
     "start" : "node app.js",
     "deploy:stage": "git checkout develop && eb deploy strawbees-code-compiler-service-stage",
     "deploy:production": "git checkout master && eb deploy strawbees-code-compiler-serviceproduction"
