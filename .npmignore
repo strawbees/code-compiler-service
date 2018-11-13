@@ -2,7 +2,7 @@
 /.elasticbeanstalk
 yarn.lock
 /tests
-_tmp
+/_tmp*
 .DS_Store
 original_node_modules
 node_modules
