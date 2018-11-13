@@ -1,6 +1,7 @@
 const fs = require('fs').promises
 const path = require('path')
 const database = require('./database')
+const postInstallCleanup = require('./postInstallCleanup')
 const execute = require('./utils/execute')
 const modulePath = require('./utils/modulePath')
 const rimraf = require('./utils/rimraf')
@@ -19,10 +20,6 @@ const ROOT_DIR = process.env.COMPILER_BUILD_ROOT || process.env.BUILD_ROOT || '.
 const TEMP_DIR = path.resolve(ROOT_DIR, TEMP_SLUG)
 const BUILD_DIR = path.resolve(TEMP_SLUG, 'build')
 const FIRMWARE_DIR = path.resolve(__dirname, FIRMWARE_SLUG)
-const HARDWARE_DIR = modulePath(HARDWARE_SLUG)
-const LIBRARY_DIR = modulePath(LIBRARY_SLUG)
-const AVR_GCC_DIR = modulePath(AVR_GCC_SLUG)
-const ARDUINO_BUILDER_DIR = modulePath(ARDUINO_BUILDER_SLUG)
 
 /*
 * Relative dir paths (calculated on init)
@@ -50,6 +47,10 @@ let BOARD_SETTINGS
 */
 const install = async () => {
 	console.log('Compiler install')
+	const HARDWARE_DIR = modulePath(HARDWARE_SLUG)
+	const LIBRARY_DIR = modulePath(LIBRARY_SLUG)
+	const AVR_GCC_DIR = modulePath(AVR_GCC_SLUG)
+	const ARDUINO_BUILDER_DIR = modulePath(ARDUINO_BUILDER_SLUG)
 	/*
 	* Clean up temporary directories
 	*/
@@ -157,9 +158,12 @@ const install = async () => {
 	/*
 	* Delete unecessary files (this will effectly break the node_modules)
 	*/
-	await rimraf(LIBRARY_DIR)
-	await rimraf(HARDWARE_DIR)
-	await rimraf(ARDUINO_BUILDER_DIR)
+	await postInstallCleanup({
+		libraryDir        : LIBRARY_DIR,
+		hardwareDir       : HARDWARE_DIR,
+		arduinoBuilderDir : ARDUINO_BUILDER_DIR,
+		avrGccDir         : AVR_GCC_DIR
+	})
 
 	console.log('Compiler installed')
 }
