@@ -1,174 +1,246 @@
 const fs = require('fs').promises
 const path = require('path')
 const database = require('./database')
-const cpdir = require('./utils/cpdir')
+const postInstallCleanup = require('./postInstallCleanup')
 const execute = require('./utils/execute')
 const modulePath = require('./utils/modulePath')
 const rimraf = require('./utils/rimraf')
 
-/**
- * Create control variables
-**/
-const TEMP_SLUG            = '_tmp_compiler'
-const FIRMWARE_SLUG        = 'firmware'
-const HARDWARE_SLUG        = 'quirkbot-arduino-hardware'
-const LIBRARY_SLUG         = 'quirkbot-arduino-library'
-const AVR_GCC_SLUG         = 'quirkbot-avr-gcc'
+/*
+* Create control variables
+*/
+const TEMP_SLUG = '_tmp_compiler'
+const FIRMWARE_SLUG = 'firmware'
+const HARDWARE_SLUG = 'quirkbot-arduino-hardware'
+const LIBRARY_SLUG = 'quirkbot-arduino-library'
+const AVR_GCC_SLUG = 'quirkbot-avr-gcc'
 const ARDUINO_BUILDER_SLUG = 'quirkbot-arduino-builder'
 
-const ROOT_DIR            = process.env.COMPILER_BUILD_ROOT || process.env.BUILD_ROOT || './'
-const TEMP_DIR            = path.resolve(ROOT_DIR, TEMP_SLUG)
-const FIRMWARE_DIR        = path.resolve(__dirname, FIRMWARE_SLUG)
-const HARDWARE_DIR        = modulePath(HARDWARE_SLUG)
-const LIBRARY_DIR         = modulePath(LIBRARY_SLUG)
-const AVR_GCC_DIR         = modulePath(AVR_GCC_SLUG)
-const ARDUINO_BUILDER_DIR = modulePath(ARDUINO_BUILDER_SLUG)
+const ROOT_DIR = process.env.COMPILER_BUILD_ROOT || process.env.BUILD_ROOT || './'
+const TEMP_DIR = path.resolve(ROOT_DIR, TEMP_SLUG)
+const BUILD_DIR = path.resolve(TEMP_SLUG, 'build')
+const FIRMWARE_DIR = path.resolve(__dirname, FIRMWARE_SLUG)
 
-/**
- * The computed script that calculates the size of the .hex
-**/
-const SIZE_SCRIPT = `"${path.join(AVR_GCC_DIR, 'tools', 'avr', 'bin', 'avr-size')}" "${path.join(TEMP_DIR, 'firmware.ino.elf')}"`
+/*
+* Relative dir paths (calculated on init)
+*/
+let TEMP_DIR_RELATIVE
+let BUILD_DIR_RELATIVE
 
-/**
- * The computed compile script
-**/
+/*
+* The computed script that calculates the size of the .hex
+*/
+let SIZE_SCRIPT
+
+/*
+* The computed compile script
+*/
 let COMPILE_SCRIPT
 
-/**
- * The computed board settings
-**/
-const BOARD_SETTINGS = {}
+/*
+* The computed board settings
+*/
+let BOARD_SETTINGS
 
-const init = async () => {
-
-	/**
-	 * Clean up temporary directories
-	**/
+/*
+* "Warms up" the server by making the initial compilations
+*/
+const install = async () => {
+	console.log('Compiler install')
+	const HARDWARE_DIR = modulePath(HARDWARE_SLUG)
+	const LIBRARY_DIR = modulePath(LIBRARY_SLUG)
+	const AVR_GCC_DIR = modulePath(AVR_GCC_SLUG)
+	const ARDUINO_BUILDER_DIR = modulePath(ARDUINO_BUILDER_SLUG)
+	/*
+	* Clean up temporary directories
+	*/
 	try {
+		await rimraf(TEMP_DIR)
 		await fs.mkdir(TEMP_DIR)
+		await fs.mkdir(BUILD_DIR)
 	} catch (e) {}
 
-	/**
-	 * Exctract the board settingds
-	**/
+	/*
+	* Exctract the board settings
+	*/
 	const boardsTxt = (await fs.readFile(path.join(HARDWARE_DIR, 'avr', 'boards.txt'))).toString()
+	const boardSettings = {}
 	boardsTxt.split('\n').forEach((line) => {
 		const parts = line.split('=')
 		if (parts.length === 2) {
 			const [key, value] = parts
-			BOARD_SETTINGS[key] = value
+			boardSettings[key] = value
 		}
 	})
+	await fs.writeFile(path.join(TEMP_DIR, 'boards.json'), JSON.stringify(boardSettings, null, '\t'))
 
-	/**
-	 * Make an initial compilation of the "factory program" using
-	 * arduino-builder, so we can extract the build steps, exactly the same way
-	 * arduino does it.
-	**/
-	const { stdout : arduinoBuilderOutput } = await execute(
-		'"' + path.join(ARDUINO_BUILDER_DIR, 'tools', 'arduino-builder') + '" ' +
-		'-hardware="'   + 'node_modules' + '" ' +
-		'-libraries="'  + 'node_modules' + '" ' +
-		'-hardware="'   + path.join(ARDUINO_BUILDER_DIR, 'tools', 'hardware') + '" ' +
-		'-tools="'      + path.join(AVR_GCC_DIR, 'tools') + '" ' +
-		'-tools="'      + path.join(ARDUINO_BUILDER_DIR, 'tools', 'tools') + '" ' +
-		'-fqbn="'       + HARDWARE_SLUG + ':avr:quirkbot" ' +
-		'-ide-version=' + '10607 ' +
-		'-build-path="' + TEMP_DIR + '" ' +
-		'-verbose ' +
-		'"' + path.join(FIRMWARE_DIR, 'firmware.ino') + '"'
+	/*
+	* Make an initial compilation of the built in firmwares using
+	* arduino-builder, so we can extract the build steps, exactly the same way
+	* arduino does it.
+	*/
+	const arduinoBuilderScript = [
+		`"${path.join(ARDUINO_BUILDER_DIR, 'tools', 'arduino-builder')}"`,
+		'-hardware="node_modules"',
+		'-libraries="node_modules"',
+		`-hardware="${path.join(ARDUINO_BUILDER_DIR, 'tools', 'hardware')}"`,
+		`-tools="${path.join(AVR_GCC_DIR, 'tools')}"`,
+		`-tools="${path.join(ARDUINO_BUILDER_DIR, 'tools', 'tools')}"`,
+		`-fqbn="${HARDWARE_SLUG}:avr:quirkbot"`,
+		'-ide-version=10607',
+		`-build-path="${BUILD_DIR}"`,
+		'-verbose'
+	].join(' ')
+	// build the bootloader updater
+	await execute([
+		arduinoBuilderScript,
+		`"${path.join(FIRMWARE_DIR, 'bootloader_updater.ino')}"`
+	].join(' '))
+	await fs.rename(path.join(BUILD_DIR, 'bootloader_updater.ino.hex'), path.join(TEMP_DIR, 'bootloader_updater.ino.hex'))
+
+	// build the factory reset (this will produce the output we will use)
+	const { stdout : arduinoBuilderOutput } = await execute([
+		arduinoBuilderScript,
+		`"${path.join(FIRMWARE_DIR, 'firmware.ino')}"`
+	].join(' '))
+	await fs.rename(path.join(BUILD_DIR, 'firmware.ino.hex'), path.join(TEMP_DIR, 'factory.ino.hex'))
+
+	/*
+	* Precompile header, so we don't need to access the files from the Quirkbot
+	* library anymore
+	*/
+	await execute(
+		arduinoBuilderOutput
+			.split('\n')
+			.filter(line => line.indexOf('firmware.ino.cpp.o') !== -1)[0]
+			.split(path.join(BUILD_DIR, 'sketch', 'firmware.ino.cpp'))
+			.join(path.join(LIBRARY_DIR, 'src', 'Quirkbot.h'))
+			.split(path.join(LIBRARY_DIR, 'src', 'Quirkbot.h.o'))
+			.join(path.join(TEMP_DIR, 'Quirkbot.h.gch'))
 	)
-	await fs.writeFile(path.join(TEMP_DIR, 'arduinoBuilderOutput.txt'), arduinoBuilderOutput)
-	// /**
-	//  * Precompile header
-	// **/
-	// const precompileHeaderScript = (
-	// 	arduinoBuilderOutput
-	// 	.split('\n')
-	// 	.filter(line => line.indexOf('firmware.ino.cpp.o') !== -1)
-	// 	[0]
-	// 	.split(path.join(TEMP_DIR, 'sketch', 'firmware.ino.cpp'))
-	// 	.join(path.join(LIBRARY_DIR, 'src', 'Quirkbot.h'))
-	// 	.split(path.join(LIBRARY_DIR, 'src', 'Quirkbot.h.o'))
-	// 	.join(path.join(LIBRARY_DIR, 'src', 'Quirkbot.h.gch'))
-	// )
 
-	/**
-	 * Compose the build script
-	**/
-	COMPILE_SCRIPT = (
+	/*
+	* Compose the compile script
+	*/
+	const compileScript = (
 		[
 			arduinoBuilderOutput
-			.split('\n')
-			.filter(line =>
-				line.indexOf('firmware.ino.cpp.o') !== -1
-			)[0],
+				.split('\n')
+				.filter(line =>
+					line.indexOf('firmware.ino.cpp.o') !== -1
+				)[0],
 			arduinoBuilderOutput
-			.split('\n')
-			.filter(line => line.indexOf('firmware.ino.elf') !== -1)
-			.filter(line => line.indexOf('firmware.ino.eep') === -1)
-			.join('\n')
+				.split('\n')
+				.filter(line => line.indexOf('firmware.ino.elf') !== -1 && line.indexOf('avr-size') === -1)
+				.filter(line => line.indexOf('firmware.ino.eep') === -1)
+				.join('\n')
 		].join('\n')
+			// transform into a one liner
+			.split('\n').join(' && ')
+			// replace the quirkbot library include path with the temp path
+			// (as the precompiled header is there)
+			.split(path.join(LIBRARY_DIR, 'src'))
+			.join(path.join(TEMP_DIR))
+			// relativise the paths
+			.split(__dirname).join('.')
+	)
+	await fs.writeFile(path.join(TEMP_DIR, 'compile.sh'), compileScript)
+
+	/*
+	* Compose the size script
+	*/
+	const sizeScript = (
+		`"${path.join(AVR_GCC_DIR, 'tools', 'avr', 'bin', 'avr-size')}" ` +
+		`"${path.join(BUILD_DIR, 'firmware.ino.elf')}"`
+	).split(__dirname).join('.') // relativise the paths
+	await fs.writeFile(path.join(TEMP_DIR, 'size.sh'), sizeScript)
+
+	/*
+	* Delete unecessary files (this will effectly break the node_modules)
+	*/
+	await postInstallCleanup({
+		libraryDir        : LIBRARY_DIR,
+		hardwareDir       : HARDWARE_DIR,
+		arduinoBuilderDir : ARDUINO_BUILDER_DIR,
+		avrGccDir         : AVR_GCC_DIR
+	})
+
+	console.log('Compiler installed')
+}
+
+const init = async () => {
+	console.log('Compiler init')
+
+	/*
+	* Cache the necessary scripts
+	*/
+	TEMP_DIR_RELATIVE = TEMP_DIR.split(__dirname).join('.')
+	BUILD_DIR_RELATIVE = BUILD_DIR.split(__dirname).join('.')
+	SIZE_SCRIPT =
+		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'size.sh'))).toString()
+	COMPILE_SCRIPT =
+		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'compile.sh'))).toString()
+	BOARD_SETTINGS = JSON.parse(
+		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'boards.json'))).toString()
 	)
 
-	/**
-	 * Store the "factory program"
-	**/
+	/*
+	* Store the "factory program"
+	*/
 	database.setConfig('firmware-reset',
-		await fs.readFile(path.join(TEMP_DIR, 'firmware.ino.hex'))
+		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'factory.ino.hex'))).toString()
 	)
 
-	/**
-	 * Store the library config
-	**/
-	database.setConfig('library-info',
-		await fs.readFile(path.join(LIBRARY_DIR, 'library.properties'))
+	/*
+	* Store the "factory program"
+	*/
+	database.setConfig('firmware-booloader-updater',
+		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'bootloader_updater.ino.hex'))).toString()
 	)
 
-	/**
-	 * Store the hardware config
-	**/
-	database.setConfig('hardware-info',
-		await fs.readFile(path.join(HARDWARE_DIR, 'avr', 'version.txt'))
-	)
+	/*
+	* Start to recursively build
+	*/
+	runBuildRecursively()
 
-	/**
-	 * Start to recursively build
-	**/
-	recursivelyBuild()
-
-	console.log('Compiler ready')
+	console.log('Compiler initialized')
 }
 
 const runCompile = async (code) => {
-	/**
-	 * Write the code to disk
-	**/
-	await fs.writeFile(path.join(TEMP_DIR, 'sketch', 'firmware.ino.cpp'), code)
+	/*
+	* Write the code to disk and delete previous results
+	*/
+	await fs.writeFile(path.join(BUILD_DIR_RELATIVE, 'sketch', 'firmware.ino.cpp'), code)
+	try {
+		await fs.unlink(path.join(BUILD_DIR_RELATIVE, 'firmware.ino.elf'))
+		await fs.unlink(path.join(BUILD_DIR_RELATIVE, 'firmware.ino.hex'))
+	} catch (error) {
+		console.log('Error deleting previous results', error)
+	}
 
-	/**
-	 * Run the compilation
-	**/
+	/*
+	* Run the compilation
+	*/
 	await execute(COMPILE_SCRIPT)
 
-	/**
-	 * Read the generated hex
-	**/
-	return (await fs.readFile(path.join(TEMP_DIR, 'firmware.ino.hex'))).toString()
+	/*
+	* Read the generated hex
+	*/
+	return (await fs.readFile(path.join(BUILD_DIR_RELATIVE, 'firmware.ino.hex'))).toString()
 }
 
 const runSize = async () => {
-	/**
-	 * Run the size script, and parse the results
+	/*
+	* Run the size script, and parse the results
 	 *
-	 * The size result will be on the format like the example below:
- 	 * text		data	bss	    dec	    	hex
- 	 * 14442	146	    586		15174	   3b46
-	**/
+	* The size result will be on the format like the example below:
+ 	* text		data	bss	    dec	    	hex
+ 	* 14442	146	    586		15174	   3b46
+	*/
 	const { stdout } = await execute(SIZE_SCRIPT)
 
 	// We want to return ROM (text + data) and RAM (data + bss)
-	let  processedSize = stdout.split('\n')
+	let processedSize = stdout.split('\n')
 	if (processedSize.length < 2) {
 		throw new Error(`Invalid size string: ${stdout}`)
 	}
@@ -183,20 +255,18 @@ const runSize = async () => {
 	const maxRom = Number(BOARD_SETTINGS['quirkbot.upload.maximum_size'])
 	const maxRam = Number(BOARD_SETTINGS['quirkbot.upload.maximum_data_size'] * 0.8)
 
-	if (rom > maxRom){
-		throw 'ROM_MAX'
-		return
+	if (rom > maxRom) {
+		throw new Error('ROM_MAX')
 	}
 
-	if (ram > maxRam){
-		throw 'RAM_MAX'
-		return
+	if (ram > maxRam) {
+		throw new Error('RAM_MAX')
 	}
 
-	return [ rom, maxRom, ram, maxRam ]
+	return [rom, maxRom, ram, maxRam]
 }
 
-const build = async (code) => {
+const runBuild = async (code) => {
 	const hex = await runCompile(code)
 	const size = await runSize()
 	return {
@@ -205,25 +275,25 @@ const build = async (code) => {
 	}
 }
 
-const recursivelyBuild = async () => {
+const runBuildRecursively = async () => {
 	try {
 		const { id, code } = await database.getNext()
 		let hex
 		let error
 		let size
 		try {
-			const result = await build(code)
-			hex = result.hex
-			size = result.size
+			({ hex, size } = await runBuild(code))
 		} catch (e) {
 			error = e.message
+			console.log('Build error\n', error)
 		}
 
 		await database.setReady(id, hex, error, size)
-		setTimeout(recursivelyBuild, 100)
+		setTimeout(runBuildRecursively, 100)
 	} catch (e) {
-		setTimeout(recursivelyBuild, 1000)
+		setTimeout(runBuildRecursively, 1000)
 	}
 }
 
-init()
+module.exports.install = install
+module.exports.init = init

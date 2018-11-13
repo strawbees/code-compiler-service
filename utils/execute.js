@@ -1,11 +1,15 @@
-var exec = require('child_process').exec
+const { exec } = require('child_process')
 
-module.exports = (command, resolveError) => new Promise((resolve, reject) => {
-	exec(command, { maxBuffer : 1024 * 500 }, (error, stdout, stderr) => {
-		if (!resolveError && error !== null){
-			reject(stderr)
-		} else {
-			resolve({ stdout, stderr })
+module.exports = (command, options = {}, envelope = {}) => new Promise((resolve, reject) => {
+	envelope.child = exec(
+		command,
+		{ maxBuffer : 1024 * 500, ...options },
+		(error, stdout, stderr) => {
+			if (!options.forceResolve && error !== null) {
+				reject(new Error(stderr))
+			} else {
+				resolve({ stdout, stderr })
+			}
 		}
-	})
+	)
 })

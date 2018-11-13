@@ -82,7 +82,7 @@ var run = function(){
 
 	pass()
 	.then(compileAndVerifyResult)
-	.then(delay(1000/( parseFloat(getParameterByName('r')) || 1 )))
+	.then(delay(1000/( parseFloat(getParameterByName('r')) || 0.5 )))
 	.then(run);
 }
 run();
