@@ -24,12 +24,6 @@ const FIRMWARE_DIR = path.resolve(ROOT_DIR, FIRMWARE_SLUG)
 console.log('Compiler ROOT_DIR:', ROOT_DIR)
 
 /*
-* Relative dir paths (calculated on init)
-*/
-let TEMP_DIR_RELATIVE
-let BUILD_DIR_RELATIVE
-
-/*
 * The computed script that calculates the size of the .hex
 */
 let SIZE_SCRIPT
@@ -141,10 +135,13 @@ const install = async () => {
 			.split('\n').join(' && ')
 			// replace the quirkbot library include path with the temp path
 			// (as the precompiled header is there)
-			.split(path.join(LIBRARY_DIR, 'src'))
-			.join(path.join(TEMP_DIR))
-			// relativise the paths
-			.split(ROOT_DIR).join('.')
+			.split(path.join(LIBRARY_DIR, 'src')).join(path.join(TEMP_DIR))
+			// tokenize the paths
+			.split(HARDWARE_DIR).join('{{HARDWARE_DIR}}')
+			.split(LIBRARY_DIR).join('{{LIBRARY_DIR}}')
+			.split(AVR_GCC_DIR).join('{{AVR_GCC_DIR}}')
+			.split(ARDUINO_BUILDER_DIR).join('{{ARDUINO_BUILDER_DIR}}')
+
 	)
 	await fs.writeFile(path.join(TEMP_DIR, 'compile.sh'), compileScript)
 
@@ -154,7 +151,12 @@ const install = async () => {
 	const sizeScript = (
 		`"${path.join(AVR_GCC_DIR, 'tools', 'avr', 'bin', 'avr-size')}" ` +
 		`"${path.join(BUILD_DIR, 'firmware.ino.elf')}"`
-	).split(ROOT_DIR).join('.') // relativise the paths
+	)
+		// tokenize the paths
+		.split(HARDWARE_DIR).join('{{HARDWARE_DIR}}')
+		.split(LIBRARY_DIR).join('{{LIBRARY_DIR}}')
+		.split(AVR_GCC_DIR).join('{{AVR_GCC_DIR}}')
+		.split(ARDUINO_BUILDER_DIR).join('{{ARDUINO_BUILDER_DIR}}')
 	await fs.writeFile(path.join(TEMP_DIR, 'size.sh'), sizeScript)
 
 	/*
@@ -172,32 +174,45 @@ const install = async () => {
 
 const init = async () => {
 	console.log('Compiler init')
-
+	const HARDWARE_DIR = modulePath(HARDWARE_SLUG)
+	const LIBRARY_DIR = modulePath(LIBRARY_SLUG)
+	const AVR_GCC_DIR = modulePath(AVR_GCC_SLUG)
+	const ARDUINO_BUILDER_DIR = modulePath(ARDUINO_BUILDER_SLUG)
 	/*
 	* Cache the necessary scripts
 	*/
-	TEMP_DIR_RELATIVE = TEMP_DIR.split(ROOT_DIR).join('.')
-	BUILD_DIR_RELATIVE = BUILD_DIR.split(ROOT_DIR).join('.')
 	SIZE_SCRIPT =
-		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'size.sh'))).toString()
+		(await fs.readFile(path.join(TEMP_DIR, 'size.sh'))).toString()
+		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR)
+		.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR)
+		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
+		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
 	COMPILE_SCRIPT =
-		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'compile.sh'))).toString()
+		(await fs.readFile(path.join(TEMP_DIR, 'compile.sh'))).toString()
+		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR)
+		.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR)
+		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
+		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
 	BOARD_SETTINGS = JSON.parse(
-		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'boards.json'))).toString()
+		(await fs.readFile(path.join(TEMP_DIR, 'boards.json'))).toString()
+		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR)
+		.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR)
+		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
+		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
 	)
 
 	/*
 	* Store the "factory program"
 	*/
 	database.setConfig('firmware-reset',
-		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'factory.ino.hex'))).toString()
+		(await fs.readFile(path.join(TEMP_DIR, 'factory.ino.hex'))).toString()
 	)
 
 	/*
 	* Store the "factory program"
 	*/
 	database.setConfig('firmware-booloader-updater',
-		(await fs.readFile(path.join(TEMP_DIR_RELATIVE, 'bootloader_updater.ino.hex'))).toString()
+		(await fs.readFile(path.join(TEMP_DIR, 'bootloader_updater.ino.hex'))).toString()
 	)
 
 	/*
@@ -212,10 +227,10 @@ const runCompile = async (code) => {
 	/*
 	* Write the code to disk and delete previous results
 	*/
-	await fs.writeFile(path.join(BUILD_DIR_RELATIVE, 'sketch', 'firmware.ino.cpp'), code)
+	await fs.writeFile(path.join(BUILD_DIR, 'sketch', 'firmware.ino.cpp'), code)
 	try {
-		await fs.unlink(path.join(BUILD_DIR_RELATIVE, 'firmware.ino.elf'))
-		await fs.unlink(path.join(BUILD_DIR_RELATIVE, 'firmware.ino.hex'))
+		await fs.unlink(path.join(BUILD_DIR, 'firmware.ino.elf'))
+		await fs.unlink(path.join(BUILD_DIR, 'firmware.ino.hex'))
 	} catch (error) {
 		console.log('Error deleting previous results', error)
 	}
@@ -228,7 +243,7 @@ const runCompile = async (code) => {
 	/*
 	* Read the generated hex
 	*/
-	return (await fs.readFile(path.join(BUILD_DIR_RELATIVE, 'firmware.ino.hex'))).toString()
+	return (await fs.readFile(path.join(BUILD_DIR, 'firmware.ino.hex'))).toString()
 }
 
 const runSize = async () => {
