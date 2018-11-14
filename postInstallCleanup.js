@@ -41,15 +41,22 @@ module.exports = async ({
 }) => {
 	// free to remove whole directory
 	console.log('removing', libraryDir)
-	await rimraf(libraryDir)
+	await keepInDir(libraryDir,[
+		'package.json',
+	])
 	console.log('removing', hardwareDir)
-	await rimraf(hardwareDir)
+	await keepInDir(hardwareDir,[
+		'package.json',
+	])
 	console.log('removing', arduinoBuilderDir)
-	await rimraf(arduinoBuilderDir)
+	await keepInDir(arduinoBuilderDir,[
+		'package.json',
+	])
 	console.log('removing', avrGccDir)
 	// for avr-gcc we need to cherry pick what to remove
 	await keepInDir(avrGccDir,[
-		'tools'
+		'tools',
+		'package.json'
 	])
 	await removeFromDir(path.join(avrGccDir, 'tools', 'avr'),[
 		'include',
