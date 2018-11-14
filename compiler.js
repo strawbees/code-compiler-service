@@ -18,7 +18,7 @@ const ARDUINO_BUILDER_SLUG = 'quirkbot-arduino-builder'
 
 const ROOT_DIR = __dirname
 const TEMP_DIR = path.resolve(ROOT_DIR, TEMP_SLUG)
-const BUILD_DIR = path.resolve(TEMP_SLUG, 'build')
+const BUILD_DIR = path.resolve(TEMP_DIR, 'build')
 const FIRMWARE_DIR = path.resolve(ROOT_DIR, FIRMWARE_SLUG)
 
 console.log('Compiler ROOT_DIR:', ROOT_DIR)
