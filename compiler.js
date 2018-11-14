@@ -185,24 +185,22 @@ const init = async () => {
 	/*
 	* Cache the necessary scripts
 	*/
-	SIZE_SCRIPT =
-		(await fs.readFile(path.join(TEMP_DIR, 'size.sh'))).toString()
+	SIZE_SCRIPT = (await fs.readFile(path.join(TEMP_DIR, 'size.sh'))).toString()
 		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR)
 		.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR)
 		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
 		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
 		.split('{{BUILD_DIR}}').join(BUILD_DIR)
 		.split('{{TEMP_DIR}}').join(TEMP_DIR)
-		.split(__dirname).join('.')
-	COMPILE_SCRIPT =
-		(await fs.readFile(path.join(TEMP_DIR, 'compile.sh'))).toString()
+		.split(process.cwd()).join('.')
+	COMPILE_SCRIPT = (await fs.readFile(path.join(TEMP_DIR, 'compile.sh'))).toString()
 		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR)
 		.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR)
 		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
 		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
 		.split('{{BUILD_DIR}}').join(BUILD_DIR)
 		.split('{{TEMP_DIR}}').join(TEMP_DIR)
-		.split(__dirname).join('.')
+		.split(process.cwd()).join('.')
 
 	/*
 	* Load bard settings
