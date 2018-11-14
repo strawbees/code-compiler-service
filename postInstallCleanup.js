@@ -3,24 +3,34 @@ const fs = require('fs').promises
 const rimraf = require('./utils/rimraf')
 
 const keepInDir = async (dirPath, keep) => {
-	const list = await fs.readdir(dirPath)
-	await Promise.all(list.map(async (entry) => {
-		if (keep.indexOf(entry) !== -1) {
-			return
-		}
-		const entryPath = path.join(dirPath, entry)
-		await rimraf(entryPath)
-	}))
+	try {
+		await fs.access(dirPath)
+		const list = await fs.readdir(dirPath)
+		await Promise.all(list.map(async (entry) => {
+			if (keep.indexOf(entry) !== -1) {
+				return
+			}
+			const entryPath = path.join(dirPath, entry)
+			await rimraf(entryPath)
+		}))
+	} catch (e) {
+		console.log('error running keepInDir', e)
+	}
 }
 const removeFromDir = async (dirPath, remove) => {
-	const list = await fs.readdir(dirPath)
-	await Promise.all(list.map(async (entry) => {
-		if (remove.indexOf(entry) === -1) {
-			return
-		}
-		const entryPath = path.join(dirPath, entry)
-		await rimraf(entryPath)
-	}))
+	try {
+		await fs.access(dirPath)
+		const list = await fs.readdir(dirPath)
+		await Promise.all(list.map(async (entry) => {
+			if (remove.indexOf(entry) === -1) {
+				return
+			}
+			const entryPath = path.join(dirPath, entry)
+			await rimraf(entryPath)
+		}))
+	} catch (e) {
+		console.log('error running removeFromDir', e)
+	}
 }
 
 module.exports = async ({
