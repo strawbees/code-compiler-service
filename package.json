@@ -1,6 +1,6 @@
 {
   "name": "strawbees-code-compiler-service",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "author": "Paulo Barcelos <paulo@strawbees.com>",
   "description": "Cloud service that compiles Quirkbot programs.",
   "dependencies": {
@@ -20,8 +20,8 @@
     "eslint-plugin-react": "^7.10.0"
   },
   "scripts": {
-    "postinstall" : "node postinstall.js",
-    "start" : "node app.js",
+    "postinstall": "node postinstall.js",
+    "start": "node app.js",
     "deploy": "git checkout master && git push && git push --tags && git checkout develop && git push && npm publish",
     "deploy:stage": "git checkout develop && eb deploy strawbees-code-compiler-service-stage",
     "deploy:production": "git checkout master && eb deploy strawbees-code-compiler-serviceproduction"
