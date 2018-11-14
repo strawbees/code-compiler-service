@@ -83,8 +83,8 @@ const install = async () => {
 	*/
 	const arduinoBuilderScript = [
 		`"${path.join(ARDUINO_BUILDER_DIR, 'tools', 'arduino-builder')}"`,
-		'-hardware="node_modules"',
-		'-libraries="node_modules"',
+		`-hardware="${path.resolve(HARDWARE_DIR, '..')}"`,
+		`-libraries="${path.resolve(LIBRARY_DIR, '..')}"`,
 		`-hardware="${path.join(ARDUINO_BUILDER_DIR, 'tools', 'hardware')}"`,
 		`-tools="${path.join(AVR_GCC_DIR, 'tools')}"`,
 		`-tools="${path.join(ARDUINO_BUILDER_DIR, 'tools', 'tools')}"`,
