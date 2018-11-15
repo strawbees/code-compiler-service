@@ -218,7 +218,7 @@ const init = async () => {
 		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
 		.split('{{TEMP_DIR}}').join(RUNTIME_TEMP_DIR)
 		.split(RUNTIME_TEMP_DIR).join('.')
-	COMPILE_SCRIPT = `cd "${COMPILE_SCRIPT}" && ${COMPILE_SCRIPT}`
+	COMPILE_SCRIPT = `cd "${RUNTIME_TEMP_DIR}" && ${COMPILE_SCRIPT}`
 	console.log(`COMPILE_SCRIPT(length:${COMPILE_SCRIPT.length}):\n`, COMPILE_SCRIPT)
 
 	/*
