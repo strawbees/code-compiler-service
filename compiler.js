@@ -207,7 +207,8 @@ const init = async () => {
 		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
 		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
 		.split('{{TEMP_DIR}}').join(RUNTIME_TEMP_DIR)
-		.split(process.cwd()).join('.')
+		.split(RUNTIME_TEMP_DIR).join('.')
+	SIZE_SCRIPT = `cd "${RUNTIME_TEMP_DIR}" && ${SIZE_SCRIPT}`
 	console.log(`SIZE_SCRIPT(length:${SIZE_SCRIPT.length}):\n`, SIZE_SCRIPT)
 
 	COMPILE_SCRIPT = (await fs.readFile(path.join(RUNTIME_TEMP_DIR, 'compile.sh'))).toString()
@@ -216,7 +217,8 @@ const init = async () => {
 		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
 		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
 		.split('{{TEMP_DIR}}').join(RUNTIME_TEMP_DIR)
-		.split(process.cwd()).join('.')
+		.split(RUNTIME_TEMP_DIR).join('.')
+	COMPILE_SCRIPT = `cd "${COMPILE_SCRIPT}" && ${COMPILE_SCRIPT}`
 	console.log(`COMPILE_SCRIPT(length:${COMPILE_SCRIPT.length}):\n`, COMPILE_SCRIPT)
 
 	/*
