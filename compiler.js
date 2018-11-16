@@ -121,19 +121,22 @@ const install = async () => {
 	/*
 	* Compose the compile script
 	*/
-	const compileScript = (
-		[
-			arduinoBuilderOutput
-				.split('\n')
-				.filter(line =>
-					line.indexOf('firmware.ino.cpp.o') !== -1
-				)[0],
-			arduinoBuilderOutput
-				.split('\n')
-				.filter(line => line.indexOf('firmware.ino.elf') !== -1 && line.indexOf('avr-size') === -1)
-				.filter(line => line.indexOf('firmware.ino.eep') === -1)
-				.join('\n')
-		].join('\n')
+	let compileScript = [
+		arduinoBuilderOutput
+			.split('\n')
+			.filter(line =>
+				line.indexOf('firmware.ino.cpp.o') !== -1
+			)[0],
+		arduinoBuilderOutput
+			.split('\n')
+			.filter(line => line.indexOf('firmware.ino.elf') !== -1 && line.indexOf('avr-size') === -1)
+			.filter(line => line.indexOf('firmware.ino.eep') === -1)
+			.join('\n')
+	].join('\n')
+
+	compileScript =
+		// Make sure we dont use windows double backskashes
+		(process.platform === 'win32' ? compileScript.split('\\\\').join('\\') : compileScript)
 			// transform into a one liner
 			.split('\n').join(' && ')
 			// replace the quirkbot library include path with the temp path
@@ -146,7 +149,6 @@ const install = async () => {
 			.split(ARDUINO_BUILDER_DIR).join('{{ARDUINO_BUILDER_DIR}}')
 			.split(INSTALL_TEMP_DIR).join('{{TEMP_DIR}}')
 
-	)
 	await fs.writeFile(path.join(INSTALL_TEMP_DIR, 'compile.sh'), compileScript)
 
 	/*
