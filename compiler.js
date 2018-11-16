@@ -6,6 +6,7 @@ const execute = require('./utils/execute')
 const modulePath = require('./utils/modulePath')
 const rimraf = require('./utils/rimraf')
 const cpdir = require('./utils/cpdir')
+const safePath = require('./utils/safePath')
 
 /*
 * Create control variables
@@ -109,9 +110,11 @@ const install = async () => {
 	* library anymore
 	*/
 	await execute(
-		arduinoBuilderOutput
-			.split('\n')
-			.filter(line => line.indexOf('firmware.ino.cpp.o') !== -1)[0]
+		safePath(
+			arduinoBuilderOutput
+				.split('\n')
+				.filter(line => line.indexOf('firmware.ino.cpp.o') !== -1)[0]
+		)
 			.split(path.join(INSTALL_TEMP_DIR, 'build', 'sketch', 'firmware.ino.cpp'))
 			.join(path.join(LIBRARY_DIR, 'src', 'Quirkbot.h'))
 			.split(path.join(LIBRARY_DIR, 'src', 'Quirkbot.h.o'))
@@ -121,7 +124,7 @@ const install = async () => {
 	/*
 	* Compose the compile script
 	*/
-	let compileScript = [
+	const compileScript = safePath([
 		arduinoBuilderOutput
 			.split('\n')
 			.filter(line =>
@@ -132,22 +135,18 @@ const install = async () => {
 			.filter(line => line.indexOf('firmware.ino.elf') !== -1 && line.indexOf('avr-size') === -1)
 			.filter(line => line.indexOf('firmware.ino.eep') === -1)
 			.join('\n')
-	].join('\n')
-
-	compileScript =
-		// Make sure we dont use windows double backskashes
-		(process.platform === 'win32' ? compileScript.split('\\\\').join('\\') : compileScript)
-			// transform into a one liner
-			.split('\n').join(' && ')
-			// replace the quirkbot library include path with the temp path
-			// (as the precompiled header is there)
-			.split(path.join(LIBRARY_DIR, 'src')).join(path.join(INSTALL_TEMP_DIR))
-			// tokenize the paths
-			.split(HARDWARE_DIR).join('{{HARDWARE_DIR}}')
-			.split(LIBRARY_DIR).join('{{LIBRARY_DIR}}')
-			.split(AVR_GCC_DIR).join('{{AVR_GCC_DIR}}')
-			.split(ARDUINO_BUILDER_DIR).join('{{ARDUINO_BUILDER_DIR}}')
-			.split(INSTALL_TEMP_DIR).join('{{TEMP_DIR}}')
+	].join('\n'))
+		// transform into a one liner
+		.split('\n').join(' && ')
+		// replace the quirkbot library include path with the temp path
+		// (as the precompiled header is there)
+		.split(path.join(LIBRARY_DIR, 'src')).join(path.join(INSTALL_TEMP_DIR))
+		// tokenize the paths
+		.split(HARDWARE_DIR).join('{{HARDWARE_DIR}}')
+		.split(LIBRARY_DIR).join('{{LIBRARY_DIR}}')
+		.split(AVR_GCC_DIR).join('{{AVR_GCC_DIR}}')
+		.split(ARDUINO_BUILDER_DIR).join('{{ARDUINO_BUILDER_DIR}}')
+		.split(INSTALL_TEMP_DIR).join('{{TEMP_DIR}}')
 
 	await fs.writeFile(path.join(INSTALL_TEMP_DIR, 'compile.sh'), compileScript)
 
