@@ -67,6 +67,7 @@ module.exports = async ({
 		'ld',
 		'as.exe',
 		'ld.exe',
+		'libwinpthread-1.dll',
 	])
 	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'lib'),[
 		'avr5',
@@ -91,6 +92,7 @@ module.exports = async ({
 		'avr-gcc.exe',
 		'avr-objcopy.exe',
 		'avr-size.exe',
+		'libwinpthread-1.dll',
 	])
 	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib'),[
 		'gcc',
@@ -114,5 +116,6 @@ module.exports = async ({
 		'liblto_plugin.la',
 		'lto-wrapper.exe',
 		'lto1.exe',
+		'libwinpthread-1.dll'
 	])
 }
