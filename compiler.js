@@ -211,6 +211,7 @@ const init = async () => {
 		.split(RUNTIME_TEMP_DIR).join('.')
 	SIZE_SCRIPT = `cd "${RUNTIME_TEMP_DIR}" && ${SIZE_SCRIPT}`
 	console.log(`SIZE_SCRIPT(length:${SIZE_SCRIPT.length}):\n`, SIZE_SCRIPT)
+	await fs.writeFile(path.join(RUNTIME_TEMP_DIR, 'size_runtime.sh'), SIZE_SCRIPT)
 
 	COMPILE_SCRIPT = (await fs.readFile(path.join(RUNTIME_TEMP_DIR, 'compile.sh'))).toString()
 		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR)
@@ -221,6 +222,7 @@ const init = async () => {
 		.split(RUNTIME_TEMP_DIR).join('.')
 	COMPILE_SCRIPT = `cd "${RUNTIME_TEMP_DIR}" && ${COMPILE_SCRIPT}`
 	console.log(`COMPILE_SCRIPT(length:${COMPILE_SCRIPT.length}):\n`, COMPILE_SCRIPT)
+	await fs.writeFile(path.join(RUNTIME_TEMP_DIR, 'compile_runtime.sh'), COMPILE_SCRIPT)
 
 	/*
 	* Load bard settings
