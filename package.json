@@ -1,7 +1,6 @@
 {
   "name": "strawbees-code-compiler-service",
   "version": "1.0.1",
-  "author": "Paulo Barcelos <paulo@strawbees.com>",
   "description": "Cloud service that compiles Quirkbot programs.",
   "dependencies": {
     "quirkbot-arduino-builder": "0.1.1",
