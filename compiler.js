@@ -214,12 +214,29 @@ const init = async () => {
 	await fs.writeFile(path.join(RUNTIME_TEMP_DIR, 'size_runtime.sh'), SIZE_SCRIPT)
 
 	COMPILE_SCRIPT = (await fs.readFile(path.join(RUNTIME_TEMP_DIR, 'compile.sh'))).toString()
+	// Here we have to do an annoying, but important compromise. Since we use the
+	// output of Arduino Builder to generate our compile script and this output
+	// is different on Mac and Windows, we need to make an ajustment on both
+	// platforms. On Windows, the output will have all of it's subcommands
+	// wrapped in quotes, which allows us to use file paths with spaces on them
+	// without any problem. But on mac, it doesn't do that, so what we have to
+	// do instead is to manually escape the spaces every we expand the path tokens.
+	if (process.platform !== 'win32') {
+		COMPILE_SCRIPT = COMPILE_SCRIPT
+		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR.replace(/\s+/g, '\\ '))
+		.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR.replace(/\s+/g, '\\ '))
+		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR.replace(/\s+/g, '\\ '))
+		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR.replace(/\s+/g, '\\ '))
+		.split('{{TEMP_DIR}}').join(RUNTIME_TEMP_DIR.replace(/\s+/g, '\\ '))
+	} else {
+		COMPILE_SCRIPT = COMPILE_SCRIPT
 		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR)
 		.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR)
 		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
 		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
 		.split('{{TEMP_DIR}}').join(RUNTIME_TEMP_DIR)
-		.split(RUNTIME_TEMP_DIR).join('.')
+	}
+	COMPILE_SCRIPT = COMPILE_SCRIPT.split(RUNTIME_TEMP_DIR).join('.')
 	COMPILE_SCRIPT = `cd "${RUNTIME_TEMP_DIR}" && ${COMPILE_SCRIPT}`
 	console.log(`COMPILE_SCRIPT(length:${COMPILE_SCRIPT.length}):\n`, COMPILE_SCRIPT)
 	await fs.writeFile(path.join(RUNTIME_TEMP_DIR, 'compile_runtime.sh'), COMPILE_SCRIPT)
