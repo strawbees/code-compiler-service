@@ -39,51 +39,56 @@ module.exports = async ({
 	arduinoBuilderDir,
 	avrGccDir
 }) => {
+	return
 	// free to remove whole directory
 	console.log('removing', libraryDir)
-	await keepInDir(libraryDir,[
+	await keepInDir(libraryDir, [
 		'package.json',
 	])
 	console.log('removing', hardwareDir)
-	await keepInDir(hardwareDir,[
+	await keepInDir(hardwareDir, [
 		'package.json',
 	])
 	console.log('removing', arduinoBuilderDir)
-	await keepInDir(arduinoBuilderDir,[
+	await keepInDir(arduinoBuilderDir, [
 		'package.json',
 	])
 	console.log('removing', avrGccDir)
 	// for avr-gcc we need to cherry pick what to remove
-	await keepInDir(avrGccDir,[
+	await keepInDir(avrGccDir, [
 		'tools',
 		'package.json'
 	])
-	await removeFromDir(path.join(avrGccDir, 'tools', 'avr'),[
+	await removeFromDir(path.join(avrGccDir, 'tools', 'avr'), [
+		'doc',
 		'include',
-		'builtin_tools_versions.txt'
+		'info',
+		'man',
+		'share',
+		'builtin_tools_versions.txt',
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'bin'),[
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'bin'), [
 		'as',
 		'ld',
 		'as.exe',
 		'ld.exe',
 		'libwinpthread-1.dll',
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'lib'),[
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'lib'), [
 		'avr5',
 		'ldscripts'
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'lib', 'avr5'),[
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'lib', 'avr5'), [
 		'crtatmega32u4.o',
 		'libatmega32u4.a',
 		'libc.a',
 		'libm.a'
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'lib', 'ldscripts'),[
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'lib', 'ldscripts'), [
 		'avr5.xn'
 	])
 
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'bin'),[
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'bin'), [
 		'avr-g++',
 		'avr-gcc',
 		'avr-objcopy',
@@ -94,18 +99,18 @@ module.exports = async ({
 		'avr-size.exe',
 		'libwinpthread-1.dll',
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib'),[
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib'), [
 		'gcc',
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib', 'gcc', 'avr', '5.4.0'),[
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib', 'gcc', 'avr', '5.4.0'), [
 		'avr5',
 		'device-specs',
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib', 'gcc', 'avr', '5.4.0', 'device-specs'),[
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib', 'gcc', 'avr', '5.4.0', 'device-specs'), [
 		'specs-atmega32u4',
 		'specs-avr5',
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'libexec', 'gcc', 'avr', '5.4.0'),[
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'libexec', 'gcc', 'avr', '5.4.0'), [
 		'cc1plus',
 		'liblto_plugin.so',
 		'lto-wrapper',
