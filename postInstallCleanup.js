@@ -39,7 +39,6 @@ module.exports = async ({
 	arduinoBuilderDir,
 	avrGccDir
 }) => {
-	return
 	// free to remove whole directory
 	console.log('removing', libraryDir)
 	await keepInDir(libraryDir, [
