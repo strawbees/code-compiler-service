@@ -94,16 +94,16 @@ const install = async () => {
 	// build the bootloader updater
 	await execute([
 		arduinoBuilderScript,
-		`"${path.join(FIRMWARE_DIR, 'bootloader_updater.ino')}"`
+		`"${path.join(FIRMWARE_DIR, 'bootloader_updater', 'firmware.ino')}"`
 	].join(' '))
-	await fs.rename(path.join(INSTALL_TEMP_DIR, 'build', 'bootloader_updater.ino.hex'), path.join(INSTALL_TEMP_DIR, 'bootloader_updater.ino.hex'))
+	await fs.rename(path.join(INSTALL_TEMP_DIR, 'build', 'firmware.ino.hex'), path.join(INSTALL_TEMP_DIR, 'bootloader_updater.ino.hex'))
 
 	// build the factory reset (this will produce the output we will use)
 	const { stdout : arduinoBuilderOutput } = await execute([
 		arduinoBuilderScript,
-		`"${path.join(FIRMWARE_DIR, 'firmware.ino')}"`
+		`"${path.join(FIRMWARE_DIR, 'factory_program', 'firmware.ino')}"`
 	].join(' '))
-	await fs.rename(path.join(INSTALL_TEMP_DIR, 'build', 'firmware.ino.hex'), path.join(INSTALL_TEMP_DIR, 'factory.ino.hex'))
+	await fs.rename(path.join(INSTALL_TEMP_DIR, 'build', 'firmware.ino.hex'), path.join(INSTALL_TEMP_DIR, 'factory_program.ino.hex'))
 
 	/*
 	* Precompile header, so we don't need to access the files from the Quirkbot
@@ -223,18 +223,18 @@ const init = async () => {
 	// do instead is to manually escape the spaces every we expand the path tokens.
 	if (process.platform !== 'win32') {
 		COMPILE_SCRIPT = COMPILE_SCRIPT
-		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR.replace(/\s+/g, '\\ '))
-		.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR.replace(/\s+/g, '\\ '))
-		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR.replace(/\s+/g, '\\ '))
-		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR.replace(/\s+/g, '\\ '))
-		.split('{{TEMP_DIR}}').join(RUNTIME_TEMP_DIR.replace(/\s+/g, '\\ '))
+			.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR.replace(/\s+/g, '\\ '))
+			.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR.replace(/\s+/g, '\\ '))
+			.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR.replace(/\s+/g, '\\ '))
+			.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR.replace(/\s+/g, '\\ '))
+			.split('{{TEMP_DIR}}').join(RUNTIME_TEMP_DIR.replace(/\s+/g, '\\ '))
 	} else {
 		COMPILE_SCRIPT = COMPILE_SCRIPT
-		.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR)
-		.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR)
-		.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
-		.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
-		.split('{{TEMP_DIR}}').join(RUNTIME_TEMP_DIR)
+			.split('{{HARDWARE_DIR}}').join(HARDWARE_DIR)
+			.split('{{LIBRARY_DIR}}').join(LIBRARY_DIR)
+			.split('{{AVR_GCC_DIR}}').join(AVR_GCC_DIR)
+			.split('{{ARDUINO_BUILDER_DIR}}').join(ARDUINO_BUILDER_DIR)
+			.split('{{TEMP_DIR}}').join(RUNTIME_TEMP_DIR)
 	}
 	COMPILE_SCRIPT = COMPILE_SCRIPT.split(RUNTIME_TEMP_DIR).join('.')
 	COMPILE_SCRIPT = `cd "${RUNTIME_TEMP_DIR}" && ${COMPILE_SCRIPT}`
@@ -252,7 +252,7 @@ const init = async () => {
 	* Store the "factory program"
 	*/
 	database.setConfig('firmware-reset',
-		(await fs.readFile(path.join(RUNTIME_TEMP_DIR, 'factory.ino.hex'))).toString()
+		(await fs.readFile(path.join(RUNTIME_TEMP_DIR, 'factory_program.ino.hex'))).toString()
 	)
 
 	/*
