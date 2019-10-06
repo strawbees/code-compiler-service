@@ -1,7 +1,4 @@
-//var SERVER = "https://quirkbot-compiler.herokuapp.com";
-//var SERVER = "https://quirkbot-compiler-stage.herokuapp.com";
-//var SERVER = "http://quirkbot-compiler-web-stage.us-east-1.elasticbeanstalk.com"
-var SERVER = "http://localhost:8080";
+var SERVER = 'http://code-compiler-service-stage.us-east-1.elasticbeanstalk.com'
 
 var PROGRAMS = [
 	'/%23include%20%22Quirkbot.h%22%0A%0AWave%20wave1%3B%0AWave%20wave2%3B%0ALed%20led1%3B%0ALed%20led2%3B%0AServoMotor%20servoMotor1%3B%0A%0Avoid%20setup()%7B%0A%09wave1.length%20%3D%201%3B%0A%09wave1.type%20%3D%20WAVE_SINE%3B%0A%09wave1.min%20%3D%200%3B%0A%09wave1.max%20%3D%201%3B%0A%09wave1.offset%20%3D%200%3B%0A%0A%09wave2.length%20%3D%200.25%3B%0A%09wave2.type%20%3D%20WAVE_SINE%3B%0A%09wave2.min%20%3D%200%3B%0A%09wave2.max%20%3D%201%3B%0A%09wave2.offset%20%3D%200%3B%0A%0A%09led1.light.connect(wave1.out)%3B%0A%09led1.place%20%3D%20LE%3B%0A%0A%09led2.light.connect(wave2.out)%3B%0A%09led2.place%20%3D%20RE%3B%0A%0A%09servoMotor1.position.connect(wave1.out)%3B%0A%09servoMotor1.place%20%3D%20SERVO_MOTOR_1%3B%0A%7D%0A%0Avoid%20loop()%7B%0A%0A%7D%0A',
