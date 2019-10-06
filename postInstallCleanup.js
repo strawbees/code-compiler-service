@@ -122,4 +122,18 @@ module.exports = async ({
 		'lto1.exe',
 		'libwinpthread-1.dll'
 	])
+	// We also need to remove any "postinstall" scripts that may remain in the
+	// package.json of the directories. The reason is because if we run
+	// 'npm rebuild' (like AWS EB does) it in turn will try to run the
+	// postinstall, which will certainly fail.
+	await Promise.all(
+		[libraryDir, hardwareDir, arduinoBuilderDir, avrGccDir].map(async dir => {
+			const pkgPath = path.join(dir, 'package.json')
+			const pkg = JSON.parse(await fs.readFile(pkgPath))
+			if (pkg.scripts) {
+				delete pkg.scripts.postinstall
+				await fs.writeFile(pkgPath, JSON.stringify(pkg, null, '\t'))
+			}
+		})
+	)
 }
