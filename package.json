@@ -22,7 +22,7 @@
     "postinstall": "node postinstall.js",
     "start": "node app.js",
     "deploy": "git checkout master && git push && git push --tags && git checkout develop && git push && npm publish",
-    "deploy:stage": "git checkout develop && eb deploy strawbees-code-compiler-service-stage",
-    "deploy:production": "git checkout master && eb deploy strawbees-code-compiler-service-production"
+    "deploy:stage": "git checkout develop && eb deploy code-compiler-service-stage",
+    "deploy:production": "git checkout master && eb deploy code-compiler-service-production"
   }
 }
