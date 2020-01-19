@@ -101,15 +101,15 @@ module.exports = async ({
 	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib'), [
 		'gcc',
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib', 'gcc', 'avr', '5.4.0'), [
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib', 'gcc', 'avr', '7.3.0'), [
 		'avr5',
 		'device-specs',
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib', 'gcc', 'avr', '5.4.0', 'device-specs'), [
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'lib', 'gcc', 'avr', '7.3.0', 'device-specs'), [
 		'specs-atmega32u4',
 		'specs-avr5',
 	])
-	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'libexec', 'gcc', 'avr', '5.4.0'), [
+	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'libexec', 'gcc', 'avr', '7.3.0'), [
 		'cc1plus',
 		'liblto_plugin.so',
 		'lto-wrapper',
