@@ -1,6 +1,6 @@
 {
   "name": "@strawbees/code-compiler-service",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Cloud service that compiles Quirkbot programs.",
   "dependencies": {
     "quirkbot-arduino-builder": "0.1.3",
