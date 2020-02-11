@@ -66,6 +66,9 @@ module.exports = async ({
 		'share',
 		'builtin_tools_versions.txt',
 	])
+	await removeFromDir(path.join(avrGccDir, 'tools', 'avr', 'avr'), [
+		'include',
+	])
 	await keepInDir(path.join(avrGccDir, 'tools', 'avr', 'avr', 'bin'), [
 		'as',
 		'ld',
