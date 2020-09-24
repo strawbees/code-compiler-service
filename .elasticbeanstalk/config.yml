@@ -1,6 +1,6 @@
 branch-defaults:
   develop:
-    environment: code-compiler-service-stage
+    environment: code-compiler-service-production
   master:
     environment: code-compiler-service-production
 global:
