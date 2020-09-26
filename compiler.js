@@ -353,9 +353,9 @@ const runBuildRecursively = async () => {
 		}
 
 		await database.setReady(id, hex, error, size)
-		setTimeout(runBuildRecursively, 100)
+		setTimeout(runBuildRecursively, 10)
 	} catch (e) {
-		setTimeout(runBuildRecursively, 1000)
+		setTimeout(runBuildRecursively, 100)
 	}
 }
 
