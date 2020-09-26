@@ -26,6 +26,7 @@
       2,
       "as-needed"
     ],
+    "no-restricted-syntax" : 0,
     "function-paren-newline": 0,
     "comma-dangle": 0,
     "import/imports-first": 1,

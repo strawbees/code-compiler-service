@@ -1,11 +1,9 @@
-const PROGRAMS = {}
-const CONFIGS = {}
-let SIZE = 0
+let PROGRAMS = {}
+let CONFIGS = {}
 let ID_FACTORY = 1
 
 exports.create = (code) => {
 	const id = ID_FACTORY++
-	SIZE++
 	PROGRAMS[id] = {
 		code,
 		id,
@@ -26,13 +24,13 @@ exports.countPending = () => {
 
 exports.getNext = () => {
 	let instance
-	for (let program of Object.values(PROGRAMS)) {
+	for (const program of Object.values(PROGRAMS)) {
 		if (program.pending) {
 			instance = program
 			break
 		}
 	}
-	if(!instance){
+	if (!instance) {
 		throw new Error('No pending requests')
 	}
 
@@ -40,7 +38,7 @@ exports.getNext = () => {
 	return instance
 }
 exports.setReady = (id, hex = '', error = '', size = []) => {
-	for (let program of Object.values(PROGRAMS)) {
+	for (const program of Object.values(PROGRAMS)) {
 		if (program.id === id) {
 			program.ready = true
 			program.hex = hex
@@ -61,7 +59,7 @@ exports.extract = (id) => {
 exports.clearOld = (interval = 300000) => {
 	const now = Date.now()
 	Object.keys(PROGRAMS).forEach(id => {
-		if((now - PROGRAMS[id].createdAt) > interval){
+		if ((now - PROGRAMS[id].createdAt) > interval) {
 			delete PROGRAMS[id]
 		}
 	})
