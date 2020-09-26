@@ -21,7 +21,6 @@ exports.countPending = () => {
 	exports.setConfig('pending', total)
 	return total
 }
-
 exports.getNext = () => {
 	let instance
 	for (const program of Object.values(PROGRAMS)) {
@@ -68,12 +67,9 @@ exports.truncate = () => {
 	PROGRAMS = {}
 	CONFIGS = {}
 }
-
 exports.setConfig = (key, value) =>
 	CONFIGS[key] = value
-
 exports.getConfig = (key) =>
 	CONFIGS[key]
-
 exports.removeConfig = (key) =>
 	delete CONFIGS[key]
