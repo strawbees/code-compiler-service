@@ -15,11 +15,14 @@ exports.create = (code) => {
 	}
 	return id
 }
-exports.countPending = () =>
-	Object.values(PROGRAMS).filter(p =>
+exports.countPending = () => {
+	const total = Object.values(PROGRAMS).filter(p =>
 		p.pending &&
 		!p.ready
 	).length
+	exports.setConfig('pending', total)
+	return total
+}
 
 exports.getNext = () => {
 	let instance
