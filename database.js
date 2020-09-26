@@ -13,17 +13,13 @@ exports.create = (code) => {
 	}
 	return id
 }
-exports.countPending = () => {
-	const total = Object.values(PROGRAMS).filter(p =>
-		p.pending &&
-		!p.ready
-	).length
-	exports.setConfig('pending', total)
-	return total
-}
 exports.getNext = () => {
 	let instance
-	for (const program of Object.values(PROGRAMS)) {
+	const pendingPrograms = Object.values(PROGRAMS).filter(program =>
+		program.pending && !program.ready
+	)
+	exports.setConfig('pending', pendingPrograms.length)
+	for (const program of pendingPrograms) {
 		if (program.pending) {
 			instance = program
 			break
