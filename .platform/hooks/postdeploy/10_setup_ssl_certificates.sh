@@ -6,7 +6,6 @@ sudo wget -r --no-parent -A 'epel-release-*.rpm' http://dl.fedoraproject.org/pub
 sudo rpm -Uvh dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-*.rpm
 sudo yum-config-manager --enable epel*
 sudo yum -y install certbot python2-certbot-nginx
-rm -rf /etc/letsencrypt/live/ebcert
 
 # Generate certificates
 echo "LOG: Generating certificates"
@@ -19,6 +18,7 @@ eval $certbot_command
 
 # Link certificates
 echo "LOG: linking certificates"
+rm -rf /etc/letsencrypt/live/ebcert
 domain="$( cut -d ',' -f 1 <<< "${LETSENCRYPT_DOMAINS}" )";
 if [ -d /etc/letsencrypt/live ]; then
   domain_folder_name="$(ls /etc/letsencrypt/live | sort -n | grep $domain | head -1)";
