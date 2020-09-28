@@ -1,18 +1,19 @@
 #!/bin/bash
 
-# Certbot dependecies
+# Install certbot
 sudo wget -r --no-parent -A 'epel-release-*.rpm' http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/
 sudo rpm -Uvh dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-*.rpm
 sudo yum-config-manager --enable epel*
+sudo yum install certbot python2-certbot-nginx
 
 # Download certbot
-wget https://dl.eff.org/certbot-auto
-mv certbot-auto /usr/local/bin/certbot-auto
-chown root /usr/local/bin/certbot-auto
-chmod 0755 /usr/local/bin/certbot-auto
+#wget https://dl.eff.org/certbot-auto
+#mv certbot-auto /usr/local/bin/certbot-auto
+#chown root /usr/local/bin/certbot-auto
+#chmod 0755 /usr/local/bin/certbot-auto
 
 # Generate certificates
-certbot_command="/usr/local/bin/certbot-auto certonly --webroot --webroot-path /var/www/html --debug --non-interactive --email ${LETSENCRYPT_EMAIL} --agree-tos --keep-until-expiring --expand"
+certbot_command="certbot certonly --webroot --webroot-path /var/www/html --debug --non-interactive --email ${LETSENCRYPT_EMAIL} --agree-tos --keep-until-expiring --expand --nginx"
 for domain in $(echo ${LETSENCRYPT_DOMAINS} | sed "s/,/ /g")
 do
   certbot_command="$certbot_command -d $domain"
