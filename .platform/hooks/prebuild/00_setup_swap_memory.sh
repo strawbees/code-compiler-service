@@ -1,5 +1,5 @@
 #!/bin/bash
-
+echo "LOG: Setting up swap memory"
 SWAPFILE=/var/swapfile
 SWAP_MEGABYTES=2048
 

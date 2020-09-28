@@ -1,12 +1,15 @@
 #!/bin/bash
 
 # Install certbot
+echo "LOG: Installing certbot"
 sudo wget -r --no-parent -A 'epel-release-*.rpm' http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/
 sudo rpm -Uvh dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-*.rpm
 sudo yum-config-manager --enable epel*
 sudo yum -y install certbot python2-certbot-nginx
+rm -rf /etc/letsencrypt/live/ebcert
 
 # Generate certificates
+echo "LOG: Generating certificates"
 certbot_command="certbot certonly --webroot --webroot-path /var/www/html --debug --non-interactive --email ${LETSENCRYPT_EMAIL} --agree-tos --keep-until-expiring --expand"
 for domain in $(echo ${LETSENCRYPT_DOMAINS} | sed "s/,/ /g")
 do
@@ -15,7 +18,7 @@ done
 eval $certbot_command
 
 # Link certificates
-rm -rf /etc/letsencrypt/live/ebcert
+echo "LOG: linking certificates"
 domain="$( cut -d ',' -f 1 <<< "${LETSENCRYPT_DOMAINS}" )";
 if [ -d /etc/letsencrypt/live ]; then
   domain_folder_name="$(ls /etc/letsencrypt/live | sort -n | grep $domain | head -1)";
@@ -25,4 +28,5 @@ if [ -d /etc/letsencrypt/live ]; then
 fi
 
 # Reload nginx
+echo "LOG: Reloading nginx"
 service nginx reload

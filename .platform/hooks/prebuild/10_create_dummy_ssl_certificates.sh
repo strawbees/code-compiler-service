@@ -1,5 +1,6 @@
 #!/bin/bash
-rm -rf /etc/letsencrypt/live/ebcert
+echo "LOG: Creating dummy SSL certificates"
+rm -rf /etc/letsencrypt
 mkdir -p /etc/letsencrypt/live/ebcert
 openssl req -newkey rsa:4096 \
             -x509 \
