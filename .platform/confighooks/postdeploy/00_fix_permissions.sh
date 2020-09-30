@@ -1,3 +1,3 @@
 #!/bin/bash
-echo "LOG: Fixing permissions"
-sudo chown -R webapp:webapp /var/app/current
+set -e
+/bin/bash "/var/app/current/.platform/hooks/postdeploy/00_fix_permissions.sh"

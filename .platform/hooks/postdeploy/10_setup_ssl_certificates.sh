@@ -9,7 +9,7 @@ sudo yum -y install certbot python2-certbot-nginx
 
 # Generate certificates
 echo "LOG: Generating certificates"
-certbot_command="certbot certonly --webroot --webroot-path /var/www/html --debug --non-interactive --email ${LETSENCRYPT_EMAIL} --agree-tos --keep-until-expiring --expand --staging"
+certbot_command="certbot certonly --webroot --webroot-path /var/app/current/ --debug --non-interactive --email ${LETSENCRYPT_EMAIL} --agree-tos --keep-until-expiring --expand"
 for domain in $(echo ${LETSENCRYPT_DOMAINS} | sed "s/,/ /g")
 do
   certbot_command="$certbot_command -d $domain"

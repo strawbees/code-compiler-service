@@ -4,7 +4,7 @@ SWAPFILE=/var/swapfile
 SWAP_MEGABYTES=2048
 
 if [ -f $SWAPFILE ]; then
-  echo "Swapfile $SWAPFILE found, assuming already setup"
+  echo "LOG: Swapfile $SWAPFILE found, assuming already setup"
   exit 0;
 fi
 
