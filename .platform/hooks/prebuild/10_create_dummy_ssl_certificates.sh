@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "LOG: Creating dummy SSL certificates"
 if test -f "/etc/letsencrypt/live/ebcert/fullchain.pem"; then
-    echo "LOG: Certificate already exist, no need to create dummy"
+    echo "LOG: Certificate already exist, no need to create dummy."
 else
     rm -rf /etc/letsencrypt/live/ebcert
     mkdir -p /etc/letsencrypt/live/ebcert
