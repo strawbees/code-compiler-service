@@ -1,1 +1,1 @@
-web: sudo chown -R webapp:webapp /var/app/current/_tmp_compiler && node app.js
+web: pwd && sudo chown -R webapp:webapp ./_tmp_compiler && node app.js
