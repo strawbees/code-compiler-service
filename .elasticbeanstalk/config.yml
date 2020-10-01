@@ -1,10 +1,10 @@
 branch-defaults:
   develop:
-    environment: strawbees-code-compiler-stage
+    environment: code-compiler-service-stage
   master:
-    environment: strawbees-code-compiler-production
+    environment: code-compiler-service-production
 global:
-  application_name: strawbees-code-compiler
+  application_name: code-compiler-service
   branch: null
   default_ec2_keyname: aws-eb
   default_platform: Node.js 12 running on 64bit Amazon Linux 2
