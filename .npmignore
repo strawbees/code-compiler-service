@@ -1,6 +1,7 @@
 /.ebextensions
 /.elasticbeanstalk
 /.platform
+/.start-eb.sh
 yarn.lock
 /tests
 /_tmp_compiler
