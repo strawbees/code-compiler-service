@@ -1,1 +1,1 @@
-web: npm run start-aws
+web: /bin/bash start-eb.sh
