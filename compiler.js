@@ -361,3 +361,7 @@ const runBuildRecursively = async () => {
 
 module.exports.install = install
 module.exports.init = init
+module.exports.runCompile = runCompile
+module.exports.runSize = runSize
+module.exports.runBuild = runBuild
+module.exports.runBuildRecursively = runBuildRecursively

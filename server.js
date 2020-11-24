@@ -190,3 +190,8 @@ const recursivelyClearOld = async () => {
 }
 
 module.exports.init = init
+module.exports.startServer = startServer
+module.exports.indexRequest = indexRequest
+module.exports.queueRequest = queueRequest
+module.exports.configRequest = configRequest
+module.exports.recursivelyClearOld = recursivelyClearOld
