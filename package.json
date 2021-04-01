@@ -4,7 +4,7 @@
   "description": "Cloud service that compiles Quirkbot programs.",
   "dependencies": {
     "quirkbot-arduino-builder": "0.1.3",
-    "quirkbot-arduino-hardware": "0.7.0",
+    "quirkbot-arduino-hardware": "0.7.1",
     "quirkbot-arduino-library": "2.10.0",
     "quirkbot-avr-gcc": "2.0.4"
   },
