@@ -46,6 +46,8 @@ const startServer = () => {
 			resultRequest(request, response)
 		} else if (firstChar === 'c') {
 			configRequest(request, response)
+		} else if (firstChar === 'q') {
+			queueRequest(request, response)
 		} else {
 			queueRequest(request, response)
 		}
@@ -66,16 +68,19 @@ const indexRequest = (request, response) => {
 		dependencies : pkg.dependencies,
 		endpoints    : [
 			{
-				'/{source-code}' : 'Queues code for compilation'
+				'/{source-code}' : 'GET: Queues code for compilation'
 			},
 			{
-				'/i{compilation-id}' : 'Retrieves info of an ongoing compilation.'
+				'/q' : 'POST (source code in body): Queues code for compilation'
 			},
 			{
-				'/cfirmware-reset' : 'A valid HEX that will reset the Quirkbot to the factory settings.'
+				'/i{compilation-id}' : 'GET: Retrieves info of an ongoing compilation.'
 			},
 			{
-				'/cfirmware-booloader-updater' : 'A valid HEX that will update the Quirkbot bootloader.'
+				'/cfirmware-reset' : 'GET: A valid HEX that will reset the Quirkbot to the factory settings.'
+			},
+			{
+				'/cfirmware-booloader-updater' : 'GET: A valid HEX that will update the Quirkbot bootloader.'
 			}
 		]
 	}, null, '\t'))
@@ -95,7 +100,18 @@ const indexRequest = (request, response) => {
 const queueRequest = async (request, response) => {
 	let code
 	try {
-		code = decodeURIComponent(request.url.substr(1))
+		if (request.method === 'POST') {
+			let body = ''
+			await new Promise((resolve) => {
+				request.on('data', chunk => {
+					body += chunk
+				})
+				request.on('end', resolve)
+			})
+			code = body
+		} else {
+			code = decodeURIComponent(request.url.substr(1))
+		}
 	} catch (e) {}
 
 	try {
